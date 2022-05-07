@@ -1,0 +1,31 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard-ingressroute
+  namespace: kube-system
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`traefik.nas.hyeon.pro`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
+  tls:
+    certResolver: letsencrypt
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: dashboard-ingressroute
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - match: HostSNI(`*`)
+    services:
+    - name: dashboard-ingressroute
+      port: 80
+  tls:
+    passthrough: true
